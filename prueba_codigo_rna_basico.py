@@ -98,7 +98,7 @@ def sigmoid_prime(z):
 training_data, validation_data , test_data = mnist_loader.load_data_wrapper()
 training_data = list(training_data)
 test_data = list(test_data)
-red=Red([784,30,10])
+red=Red([784,100,10])
 red.SGD( training_data, 30, 10, 3.0, test_data=test_data)
 archivo = open("red_prueba1.pkl",'wb')
 pickle.dump(red,archivo)
