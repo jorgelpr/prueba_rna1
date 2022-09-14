@@ -51,9 +51,9 @@ class Red(object):
             Pt_b = [-nb+(1-gamma)*Pt_b for nb in nabla_b]
             Pt_w = [-nw+(1-gamma)*Pt_w for nw in nabla_w]
         self.weights = [w+(eta/len(mini_batch))*Pt_w
-                        for w, nw in zip(self.weights, Pt_w)]
+                        for w, Pt_w in zip(self.weights, Pt_w)]
         self.biases = [b+(eta/len(mini_batch))*Pt_b
-                       for b, nb in zip(self.biases, Pt_b)]
+                       for b, Pt_b in zip(self.biases, Pt_b)]
 
     def backprop(self, x, y):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
