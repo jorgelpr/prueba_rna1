@@ -19,7 +19,7 @@ class Red(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    def SGD(self, training_data, epochs, mini_batch_size, eta, gamma,
             test_data=None):
         training_data = list(training_data)
         n = len(training_data)
@@ -33,23 +33,27 @@ class Red(object):
                 training_data[k:k+mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch(mini_batch, eta, gamma)
             if test_data:
                 print("Epoch {} : {} / {}".format(j,self.evaluate(test_data),n_test))
             else:
                 print("Epoch {} complete".format(j))
 
-    def update_mini_batch(self, mini_batch, eta):
+    def update_mini_batch(self, mini_batch, eta, gamma):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+        Pt_b=[np.zeros(b.shape) for b in self.biases]
+        Pt_w=[np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(eta/len(mini_batch))*nw
-                        for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb
-                       for b, nb in zip(self.biases, nabla_b)]
+            Pt_b = [-nb+(1-gamma)*Pt_b for nb in nabla_b]
+            Pt_w = [-nw+(1-gamma)*Pt_w for nw in nabla_w]
+        self.weights = [w+(eta/len(mini_batch))*Pt_w
+                        for w, nw in zip(self.weights, Pt_w)]
+        self.biases = [b+(eta/len(mini_batch))*Pt_b
+                       for b, nb in zip(self.biases, Pt_b)]
 
     def backprop(self, x, y):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
@@ -98,8 +102,8 @@ def sigmoid_prime(z):
 training_data, validation_data , test_data = mnist_loader.load_data_wrapper()
 training_data = list(training_data)
 test_data = list(test_data)
-red=Red([784,100,10])
-red.SGD( training_data, 30, 10, 3.0, test_data=test_data)
+red=Red([784,30,10])
+red.SGD( training_data, 30, 10, 3.0, 0.9, test_data=test_data)
 archivo = open("red_prueba1.pkl",'wb')
 pickle.dump(red,archivo)
 archivo.close()
@@ -107,7 +111,7 @@ exit()
 archivo_lectura = open("red_prueba.pkl",'rb')
 red = pickle.load(archivo_lectura)
 archivo_lectura.close()
-red.SGD( training_data, 10, 50, 0.5, test_data=test_data)
+red.SGD( training_data, 10, 50, 0.5, 0.9, test_data=test_data)
 archivo = open("red_prueba.pkl",'wb')
 pickle.dump(red,archivo)
 archivo.close()
